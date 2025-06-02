@@ -1,12 +1,13 @@
 extends Camera2D
 
-@export var move_speed := 300.0
+@export var base_speed := 1000.0
 
-var zoom_levels := [Vector2(5, 5), Vector2(4, 4), Vector2(3, 3)]
+var zoom_levels := [Vector2(4, 4), Vector2(3, 3), Vector2(2, 2)]
 var zoom_index := 0
+var move_speed := base_speed
 
 func _ready():
-	zoom = zoom_levels[zoom_index]
+	apply_zoom()
 
 func _process(delta):
 	handle_movement(delta)
@@ -34,4 +35,8 @@ func handle_movement(delta):
 
 func change_zoom(direction: int):
 	zoom_index = clamp(zoom_index + direction, 0, zoom_levels.size() - 1)
+	apply_zoom()
+
+func apply_zoom():
 	zoom = zoom_levels[zoom_index]
+	move_speed = base_speed / zoom.x
