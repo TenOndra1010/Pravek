@@ -1,0 +1,56 @@
+[gd_scene load_steps=9 format=3 uid="uid://clts75qst04ex"]
+
+[ext_resource type="Script" uid="uid://dyxmm2hi3ohok" path="res://Main/main.gd" id="1_7t1a7"]
+[ext_resource type="Texture2D" uid="uid://ucyhhbnh7xy3" path="res://Graphics/Tileset.png" id="2_p5qbc"]
+[ext_resource type="Script" uid="uid://bn8khq18gie6c" path="res://Main/tile_map.gd" id="3_hgcri"]
+[ext_resource type="Script" uid="uid://djnl8yy8e8ekv" path="res://Main/camera_2d.gd" id="4_gtaxi"]
+[ext_resource type="Script" uid="uid://7j4nqyskbmr" path="res://Main/units_manager.gd" id="5_ptdop"]
+[ext_resource type="Script" uid="uid://chjwro05ehvwq" path="res://Main/game_manager.gd" id="6_0w474"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uu6xs"]
+texture = ExtResource("2_p5qbc")
+0:0/0 = 0
+0:0/0/custom_data_0 = "Water"
+1:0/0 = 0
+1:0/0/custom_data_0 = "Grass"
+1:0/0/custom_data_1 = true
+1:0/0/custom_data_3 = 2
+1:0/0/custom_data_4 = 1
+2:0/0 = 0
+2:0/0/custom_data_0 = "Forest"
+2:0/0/custom_data_1 = true
+2:0/0/custom_data_2 = true
+2:0/0/custom_data_3 = 3
+2:0/0/custom_data_4 = 3
+
+[sub_resource type="TileSet" id="TileSet_r0du0"]
+custom_data_layer_0/name = "tile_name"
+custom_data_layer_0/type = 4
+custom_data_layer_1/name = "is_passable"
+custom_data_layer_1/type = 1
+custom_data_layer_2/name = "blocks_vision"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "move_cost"
+custom_data_layer_3/type = 2
+custom_data_layer_4/name = "base_production"
+custom_data_layer_4/type = 2
+sources/0 = SubResource("TileSetAtlasSource_uu6xs")
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_7t1a7")
+
+[node name="Overworld" type="TileMap" parent="."]
+tile_set = SubResource("TileSet_r0du0")
+format = 2
+script = ExtResource("3_hgcri")
+
+[node name="PlayerCamera" type="Camera2D" parent="."]
+visible = false
+zoom = Vector2(5, 5)
+script = ExtResource("4_gtaxi")
+
+[node name="UnitsManager" type="Node" parent="."]
+script = ExtResource("5_ptdop")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("6_0w474")
