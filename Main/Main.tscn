@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dyxmm2hi3ohok" path="res://Main/main.gd" id="1_7t1a7"]
 [ext_resource type="Texture2D" uid="uid://ucyhhbnh7xy3" path="res://Graphics/Tileset.png" id="2_p5qbc"]
-[ext_resource type="Script" uid="uid://bn8khq18gie6c" path="res://Main/tile_map.gd" id="3_hgcri"]
+[ext_resource type="Script" uid="uid://bn8khq18gie6c" path="res://Main/overworld.gd" id="3_hgcri"]
 [ext_resource type="Script" uid="uid://djnl8yy8e8ekv" path="res://Main/camera_2d.gd" id="4_gtaxi"]
 [ext_resource type="Script" uid="uid://7j4nqyskbmr" path="res://Main/units_manager.gd" id="5_ptdop"]
 [ext_resource type="Script" uid="uid://chjwro05ehvwq" path="res://Main/game_manager.gd" id="6_0w474"]

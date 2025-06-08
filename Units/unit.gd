@@ -2,6 +2,7 @@ extends Node2D
 
 class_name Unit
 
+@export var tile_position: Vector2i
 @export var unit_type: String = "Unit"
 @export var faction: String
 @export var unit_name: String = "TestUnit"
@@ -9,9 +10,17 @@ class_name Unit
 @export var health: int
 @export var attack: int = 1
 @export var defense: int = 1
+@export var move_speed: float = 200.0
+@export var is_active: bool = true
 
 var is_selected := false
 signal unit_selected(unit)
+var is_moving := false
+var target_world_position: Vector2
+var game_manager: Node = null
+
+func set_game_manager(manager: Node):
+	game_manager = manager
 
 func _ready():
 	if health > maxhealth:
@@ -43,4 +52,18 @@ func _on_area_2d_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT and faction == "Player":
 			emit_signal("unit_selected", self)
-			print("Has method _on_unit_selected?:", self.has_method("_on_unit_selected"))
+			
+func move_to(tile_coords: Vector2i):
+	target_world_position = game_manager.tile_to_world(tile_coords)
+	is_moving = true
+
+func _physics_process(delta):
+	if is_moving:
+		var distance = target_world_position - position
+		var step = move_speed * delta
+
+		if distance.length() <= step:
+			position = target_world_position
+			is_moving = false
+		else:
+			position += distance.normalized() * step
