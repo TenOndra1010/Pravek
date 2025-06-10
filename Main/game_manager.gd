@@ -17,7 +17,7 @@ var ai_turn_in_progress := false
 var ai_units_to_process := []
 var ai_current_unit_index := 0
 
-var ai_action_delay := 0.5
+var ai_action_delay := 0.1
 var ai_action_timer := 0.0
 
 func _ready():
@@ -28,10 +28,11 @@ func start_game():
 	create_faction("Player",true)
 	create_faction("Deers",false)
 	create_faction("Wolfs",false)
+	create_faction("Bears",false)
 	spawn_unit("Human", Vector2i(5, 5), factions["Player"])
-	spawn_unit("Human", Vector2i(5, 10), factions["Player"])
-	spawn_unit("Deer", Vector2i(10, 5), factions["Deers"])
-	spawn_unit("Wolf", Vector2i(10, 10), factions["Wolfs"])
+	mass_spawn("Deers", "Deer", "GrassTile", 30)
+	mass_spawn("Wolfs", "Wolf", "ForestTile", 10)
+	mass_spawn("Bears", "Bear", "ForestTile", 3)
 	start_turn()
 	control_unlocked()
 
@@ -139,6 +140,38 @@ func spawn_unit(unit_name: String, tile_coords: Vector2i, faction: Faction):
 		push_warning("Logical tile at %s not found." % tile_coords)
 
 	unit.connect("unit_selected", Callable(self, "_on_unit_selected"))
+	
+func mass_spawn(faction_name: String, unit_name: String, tile_type_name: String, count: int = 1) -> void:
+	if not factions.has(faction_name):
+		push_warning("Faction '%s' not found." % faction_name)
+		return
+	if not units_manager.unit_scenes.has(unit_name):
+		push_warning("Unit scene '%s' not found." % unit_name)
+		return
+
+	var faction = factions[faction_name]
+	var valid_tiles: Array[Vector2i] = []
+
+	# Find all tiles that match tile type and are unoccupied by enemies
+	for x in range(overworld.MAP_WIDTH):
+		for y in range(overworld.MAP_HEIGHT):
+			var tile = overworld.get_logical_tile(Vector2i(x, y))
+			if tile and tile.tile_type.tile_name == tile_type_name:
+				var enemy_present = tile.has_enemy_unit(faction)
+				if not enemy_present:
+					valid_tiles.append(Vector2i(x, y))
+
+	if valid_tiles.is_empty():
+		push_warning("No valid tiles found for tile type '%s'." % tile_type_name)
+		return
+
+	valid_tiles.shuffle()
+	var spawn_limit = min(count, valid_tiles.size())
+
+	for i in range(spawn_limit):
+		var tile_coords = valid_tiles[i]
+		spawn_unit(unit_name, tile_coords, faction)
+
 	
 func kill_unit(unit: Unit):
 	if not is_instance_valid(unit):
