@@ -13,17 +13,25 @@ var factions: Dictionary = {}
 var faction_order: Array = []
 var current_faction_index := 0
 
+var ai_turn_in_progress := false
+var ai_units_to_process := []
+var ai_current_unit_index := 0
+
+var ai_action_delay := 0.5
+var ai_action_timer := 0.0
+
 func _ready():
 	units_manager.load_unit_scenes()
 
 func start_game():
 	control_locked()
 	create_faction("Player",true)
-	create_faction("Gaia",false)
+	create_faction("Deers",false)
+	create_faction("Wolfs",false)
 	spawn_unit("Human", Vector2i(5, 5), factions["Player"])
 	spawn_unit("Human", Vector2i(5, 10), factions["Player"])
-	spawn_unit("Human", Vector2i(10, 5), factions["Player"])
-	spawn_unit("Wolf", Vector2i(10, 10), factions["Gaia"])
+	spawn_unit("Deer", Vector2i(10, 5), factions["Deers"])
+	spawn_unit("Wolf", Vector2i(10, 10), factions["Wolfs"])
 	start_turn()
 	control_unlocked()
 
@@ -63,7 +71,32 @@ func start_turn():
 	print("Turn started for: %s" % current_faction_name)
 	current_faction.reset_units_ap()
 
+	if current_faction.is_human:
+		control_unlocked()
+	else:
+		# Prepare AI turn processing
+		ai_turn_in_progress = true
+		ai_units_to_process = current_faction.units.duplicate()
+		ai_current_unit_index = 0
+		control_locked()
+
+func _process(delta):
+	if ai_turn_in_progress:
+		ai_action_timer -= delta
+		if ai_action_timer <= 0:
+			if ai_current_unit_index < ai_units_to_process.size():
+				var unit = ai_units_to_process[ai_current_unit_index]
+				unit.unit_ai_behaviour()  # Perform the unit's action
+				ai_current_unit_index += 1
+				
+				ai_action_timer = ai_action_delay  # Reset delay timer
+			else:
+				# AI turn finished
+				ai_turn_in_progress = false
+				end_turn()
+
 func end_turn():
+	control_locked()
 	current_faction_index = (current_faction_index + 1) % faction_order.size()
 	deselect_current_unit()
 	start_turn()
@@ -148,8 +181,10 @@ func _unhandled_input(event):
 	
 	if not selected_unit or not is_instance_valid(selected_unit):
 		return
-	if selected_unit.is_moving:
+	if selected_unit.faction.turn_index != current_faction_index:
 		return
+	#if selected_unit.is_moving:
+	#	return
 	if not event.is_pressed():
 		return
 		

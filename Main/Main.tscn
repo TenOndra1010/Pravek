@@ -40,7 +40,6 @@ sources/0 = SubResource("TileSetAtlasSource_uu6xs")
 [sub_resource type="GDScript" id="GDScript_hh5pf"]
 script/source = "extends Node
 @onready var game_manager := get_parent().get_node(\"GameManager\")
-
 "
 
 [node name="Node2D" type="Node2D"]

@@ -13,11 +13,13 @@ class_name Unit
 @export var move_speed: float = 200.0
 @export var breeding_rate = 0
 
-var is_selected := false
 signal unit_selected(unit)
+
+var is_selected := false
 var is_moving := false
 var target_world_position: Vector2
 var game_manager: Node = null
+var move_queue: Array[Vector2i] = []
 
 func set_game_manager(manager: Node):
 	game_manager = manager
@@ -46,8 +48,8 @@ func deselect():
 	$SelectionIndicator.visible = false
 
 func _on_area_2d_input_event(viewport, event, shape_idx):
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT and (faction.turn_index == game_manager.current_faction_index):
+	if event is InputEventMouseButton and event.pressed and game_manager.player_control_enabled:
+		if event.button_index == MOUSE_BUTTON_LEFT:
 			emit_signal("unit_selected", self)
 
 # === AP Management ===
@@ -74,7 +76,7 @@ func move_to(tile_coords: Vector2i):
 	target_world_position = game_manager.tile_to_world(tile_coords)
 	is_moving = true
 
-func ai_behaviour():
+func unit_ai_behaviour():
 	return
 	
 func breed():
@@ -90,3 +92,11 @@ func _physics_process(delta):
 			is_moving = false
 		else:
 			position += distance.normalized() * step
+	elif move_queue.size() > 0:
+		var next_tile = move_queue.pop_front()
+		target_world_position = game_manager.tile_to_world(next_tile)
+		is_moving = true
+
+func clear_movement_queue():
+	move_queue.clear()
+	is_moving = false
