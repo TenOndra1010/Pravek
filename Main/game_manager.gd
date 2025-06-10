@@ -2,45 +2,36 @@ extends Node
 
 @onready var units_manager := get_parent().get_node("UnitsManager")
 @onready var overworld := get_parent().get_node("Overworld")
-@onready var unit_actions = get_parent().get_node("UnitActions")
+@onready var unit_actions := get_parent().get_node("UnitActions")
 
 @export var season: int = 0
 
 var selected_unit: Unit = null
-var unit_scenes := {}
+var player_control_enabled := true
 
 var factions: Dictionary = {}
 var faction_order: Array = []
 var current_faction_index := 0
 
 func _ready():
-	load_unit_scenes()
-
-func load_unit_scenes():
-	var dir := DirAccess.open("res://Units")
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if file_name.ends_with(".tscn"):
-				var path = "res://Units/" + file_name
-				var packed_scene = load(path)
-				if packed_scene is PackedScene:
-					var instance = packed_scene.instantiate()
-					if instance is Unit:
-						var name = file_name.get_basename()
-						unit_scenes[name] = packed_scene
-						instance.queue_free()
-			file_name = dir.get_next()
+	units_manager.load_unit_scenes()
 
 func start_game():
+	control_locked()
 	create_faction("Player",true)
 	create_faction("Gaia",false)
-	spawn_unit("Unit", Vector2i(5, 5), factions["Player"])
-	spawn_unit("Unit", Vector2i(5, 10), factions["Player"])
-	spawn_unit("Unit", Vector2i(10, 5), factions["Player"])
-	spawn_unit("Unit", Vector2i(10, 10), factions["Gaia"])
+	spawn_unit("Human", Vector2i(5, 5), factions["Player"])
+	spawn_unit("Human", Vector2i(5, 10), factions["Player"])
+	spawn_unit("Human", Vector2i(10, 5), factions["Player"])
+	spawn_unit("Wolf", Vector2i(10, 10), factions["Gaia"])
 	start_turn()
+	control_unlocked()
+
+func control_locked():
+	player_control_enabled = false
+
+func control_unlocked():
+	player_control_enabled = true
 
 func world_to_tile(world_pos: Vector2) -> Vector2i:
 	return overworld.local_to_map(world_pos)
@@ -94,11 +85,11 @@ func _on_unit_selected(unit):
 		print("Selected unit '%s' on tile type: %s at %s" % [selected_unit.unit_name, tile.tile_type.tile_name, selected_unit.tile_position])
 
 func spawn_unit(unit_name: String, tile_coords: Vector2i, faction: Faction):
-	if not unit_scenes.has(unit_name):
+	if not units_manager.unit_scenes.has(unit_name):
 		push_error("Unit scene '%s' not found!" % unit_name)
 		return null
 		
-	var unit = unit_scenes[unit_name].instantiate()
+	var unit = units_manager.unit_scenes[unit_name].instantiate()
 	unit.faction = faction
 	unit.tile_position = tile_coords
 	unit.position = tile_to_world(tile_coords)
@@ -148,11 +139,16 @@ func kill_unit(unit: Unit):
 	
 
 func _unhandled_input(event):
+	if not player_control_enabled:
+		return
+	
 	if event.is_action_pressed("end_turn"):
 		end_turn()
 		return
 	
 	if not selected_unit or not is_instance_valid(selected_unit):
+		return
+	if selected_unit.is_moving:
 		return
 	if not event.is_pressed():
 		return
@@ -177,6 +173,8 @@ func _unhandled_input(event):
 				print("Enemy unit detected at ", target_tile_coords)
 				if selected_unit.attack > 0:
 					var target_array: Array = target_tile.get_enemy_units(selected_unit.faction)
-					unit_actions.engage_combat(selected_unit, target_array[0])
+					control_locked()
+					unit_actions.engage_combat(selected_unit, target_array[0], direction)
+					control_unlocked()
 			else:
 				unit_actions.move_unit(selected_unit, target_tile_coords)

@@ -5,12 +5,13 @@ class_name Unit
 @export var tile_position: Vector2i
 @export var unit_type: String = "Unit"
 @export var faction: Faction
-@export var unit_name: String = "TestUnit"
+@export var unit_name: String = "Man"
 @export var max_ap: int = 10
 @export var ap: int = 10
 @export var attack: int = 1
 @export var defense: int = 1
 @export var move_speed: float = 200.0
+@export var breeding_rate = 0
 
 var is_selected := false
 signal unit_selected(unit)
@@ -72,6 +73,12 @@ func use_ap(amount := 1):
 func move_to(tile_coords: Vector2i):
 	target_world_position = game_manager.tile_to_world(tile_coords)
 	is_moving = true
+
+func ai_behaviour():
+	return
+	
+func breed():
+	return
 
 func _physics_process(delta):
 	if is_moving:

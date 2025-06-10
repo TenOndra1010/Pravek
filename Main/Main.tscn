@@ -1,10 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://clts75qst04ex"]
+[gd_scene load_steps=11 format=3 uid="uid://clts75qst04ex"]
 
 [ext_resource type="Script" uid="uid://dyxmm2hi3ohok" path="res://Main/main.gd" id="1_7t1a7"]
 [ext_resource type="Texture2D" uid="uid://ucyhhbnh7xy3" path="res://Graphics/Tileset.png" id="2_p5qbc"]
 [ext_resource type="Script" uid="uid://bn8khq18gie6c" path="res://Main/overworld.gd" id="3_hgcri"]
 [ext_resource type="Script" uid="uid://djnl8yy8e8ekv" path="res://Main/player_camera.gd" id="4_gtaxi"]
-[ext_resource type="Script" uid="uid://7j4nqyskbmr" path="res://MiscRefs/units_manager.gd" id="5_ptdop"]
+[ext_resource type="Script" uid="uid://7j4nqyskbmr" path="res://Main/units_manager.gd" id="5_ptdop"]
 [ext_resource type="Script" uid="uid://chjwro05ehvwq" path="res://Main/game_manager.gd" id="6_0w474"]
 [ext_resource type="Script" uid="uid://cp4y36pkp4rrv" path="res://Main/unit_actions.gd" id="7_hh5pf"]
 
@@ -37,6 +37,12 @@ custom_data_layer_4/name = "base_production"
 custom_data_layer_4/type = 2
 sources/0 = SubResource("TileSetAtlasSource_uu6xs")
 
+[sub_resource type="GDScript" id="GDScript_hh5pf"]
+script/source = "extends Node
+@onready var game_manager := get_parent().get_node(\"GameManager\")
+
+"
+
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_7t1a7")
 
@@ -57,3 +63,6 @@ script = ExtResource("6_0w474")
 
 [node name="UnitActions" type="Node" parent="."]
 script = ExtResource("7_hh5pf")
+
+[node name="AIManager" type="Node" parent="."]
+script = SubResource("GDScript_hh5pf")
