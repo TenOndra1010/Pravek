@@ -25,6 +25,7 @@ func _ready():
 	$Area2D.input_pickable = true
 	$Area2D.connect("input_event", Callable(self, "_on_area_2d_input_event"))
 	deselect()
+	reset_ap()
 
 func debug_info():
 	print("Unit Spawned: %s (%s)" % [unit_name, faction])
@@ -59,16 +60,16 @@ func has_ap(required_ap := 1) -> bool:
 func use_ap(amount := 1):
 	if ap >= amount:
 		ap -= amount
+		print("Used AP:")
+		print(amount)
+		print("AP left:")
+		print(ap)
 	else:
 		push_warning("Tried to use more AP than available!")
 
 # === Movement ===
 
 func move_to(tile_coords: Vector2i):
-	if not has_ap():
-		print("Unit '%s' has no AP to move." % unit_name)
-		return
-	use_ap()
 	target_world_position = game_manager.tile_to_world(tile_coords)
 	is_moving = true
 

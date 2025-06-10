@@ -23,4 +23,23 @@ func get_unit_count() -> int:
 	return present_units.size()
 
 func get_units() -> Array[Unit]:
-	return present_units.duplicate()  # Return a copy for safety
+	return present_units.duplicate()
+
+func has_unit_with_faction(faction: Faction) -> bool:
+	for unit in present_units:
+		if unit.faction == faction:
+			return true
+	return false
+
+func has_enemy_unit(faction: Faction) -> bool:
+	for unit in present_units:
+		if unit.faction != faction:
+			return true
+	return false
+
+func get_enemy_units(faction: Faction) -> Array:
+	var enemies := []
+	for unit in present_units:
+		if unit.faction != faction:
+			enemies.append(unit)
+	return enemies

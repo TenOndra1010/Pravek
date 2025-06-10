@@ -115,6 +115,37 @@ func spawn_unit(unit_name: String, tile_coords: Vector2i, faction: Faction):
 		push_warning("Logical tile at %s not found." % tile_coords)
 
 	unit.connect("unit_selected", Callable(self, "_on_unit_selected"))
+	
+func kill_unit(unit: Unit):
+	if not is_instance_valid(unit):
+		push_warning("Attempted to kill an invalid or already freed unit.")
+		return
+
+	# Remove unit from its tile
+	var tile = overworld.get_logical_tile(unit.tile_position)
+	if tile:
+		tile.remove_unit(unit)
+
+	# Remove unit from faction
+	if unit.faction:
+		unit.faction.remove_unit(unit)
+
+	# Deselect if it's the selected unit
+	if unit == selected_unit:
+		deselect_current_unit()
+
+	# Remove unit from units manager
+	units_manager.remove_unit(unit)
+
+	# Disconnect any signals if necessary (optional, mostly safe to skip if freeing immediately)
+	unit.disconnect("unit_selected", Callable(self, "_on_unit_selected"))
+
+	# Free the unit node
+	unit.queue_free()
+
+	print("Unit '%s' was killed and removed from the game." % unit.unit_name)
+
+	
 
 func _unhandled_input(event):
 	if event.is_action_pressed("end_turn"):
@@ -124,8 +155,6 @@ func _unhandled_input(event):
 	if not selected_unit or not is_instance_valid(selected_unit):
 		return
 	if not event.is_pressed():
-		return
-	if selected_unit.is_moving:
 		return
 		
 	var direction := Vector2i.ZERO
@@ -140,4 +169,14 @@ func _unhandled_input(event):
 		direction = Vector2i.DOWN
 
 	if direction != Vector2i.ZERO:
-		unit_actions.move_unit(selected_unit, selected_unit.tile_position + direction)
+		var target_tile_coords = selected_unit.tile_position + direction
+		var target_tile = overworld.get_logical_tile(target_tile_coords)
+		
+		if target_tile:
+			if target_tile.has_enemy_unit(selected_unit.faction):
+				print("Enemy unit detected at ", target_tile_coords)
+				if selected_unit.attack > 0:
+					var target_array: Array = target_tile.get_enemy_units(selected_unit.faction)
+					unit_actions.engage_combat(selected_unit, target_array[0])
+			else:
+				unit_actions.move_unit(selected_unit, target_tile_coords)
