@@ -1,8 +1,10 @@
 extends Node
 
+@onready var UI := get_parent().get_node("UICanvas/UI")
 @onready var units_manager := get_parent().get_node("UnitsManager")
 @onready var overworld := get_parent().get_node("Overworld")
 @onready var unit_actions := get_parent().get_node("UnitActions")
+@onready var sound_manager := get_parent().get_node("SoundManager")
 
 @export var season: int = 0
 
@@ -20,9 +22,6 @@ var ai_current_unit_index := 0
 var ai_action_delay := 0.1
 var ai_action_timer := 0.0
 
-func _ready():
-	units_manager.load_unit_scenes()
-
 func start_game():
 	control_locked()
 	create_faction("Player",true)
@@ -33,8 +32,9 @@ func start_game():
 	mass_spawn("Deers", "Deer", "GrassTile", 30)
 	mass_spawn("Wolfs", "Wolf", "ForestTile", 10)
 	mass_spawn("Bears", "Bear", "ForestTile", 3)
+	UI.clear_unit_info()
+	#sound_manager.play_music(load("res://music/Theme.wav"))
 	start_turn()
-	control_unlocked()
 
 func control_locked():
 	player_control_enabled = false
@@ -74,6 +74,7 @@ func start_turn():
 
 	if current_faction.is_human:
 		control_unlocked()
+		UI.show_turn_banner(current_faction)
 	else:
 		# Prepare AI turn processing
 		ai_turn_in_progress = true
@@ -106,12 +107,15 @@ func deselect_current_unit():
 	if selected_unit:
 		selected_unit.deselect()
 		selected_unit = null
+		UI.clear_unit_info()
+		
 
 func _on_unit_selected(unit):
 	if selected_unit:
 		selected_unit.deselect()
 	selected_unit = unit
 	selected_unit.select()
+	UI.update_unit_info(selected_unit)
 	
 	var tile = get_unit_tile(selected_unit)
 	
@@ -242,7 +246,9 @@ func _unhandled_input(event):
 				if selected_unit.attack > 0:
 					var target_array: Array = target_tile.get_enemy_units(selected_unit.faction)
 					control_locked()
-					unit_actions.engage_combat(selected_unit, target_array[0], direction)
+					unit_actions.attack(selected_unit, target_tile_coords, direction)
 					control_unlocked()
 			else:
 				unit_actions.move_unit(selected_unit, target_tile_coords)
+	
+	UI.update_unit_info(selected_unit)

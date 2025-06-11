@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://clts75qst04ex"]
+[gd_scene load_steps=13 format=3 uid="uid://clts75qst04ex"]
 
 [ext_resource type="Script" uid="uid://dyxmm2hi3ohok" path="res://Main/main.gd" id="1_7t1a7"]
 [ext_resource type="Texture2D" uid="uid://ucyhhbnh7xy3" path="res://Graphics/Tileset.png" id="2_p5qbc"]
@@ -7,6 +7,9 @@
 [ext_resource type="Script" uid="uid://7j4nqyskbmr" path="res://Main/units_manager.gd" id="5_ptdop"]
 [ext_resource type="Script" uid="uid://chjwro05ehvwq" path="res://Main/game_manager.gd" id="6_0w474"]
 [ext_resource type="Script" uid="uid://cp4y36pkp4rrv" path="res://Main/unit_actions.gd" id="7_hh5pf"]
+[ext_resource type="Script" uid="uid://dtni73cm02wvn" path="res://Main/ui.gd" id="8_bor5n"]
+[ext_resource type="Script" uid="uid://b6or1mr0wueff" path="res://Main/sound_manager.gd" id="9_bor5n"]
+[ext_resource type="AudioStream" uid="uid://b7wtht2vlqa3e" path="res://Music/Theme.wav" id="10_wltqy"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uu6xs"]
 texture = ExtResource("2_p5qbc")
@@ -37,11 +40,6 @@ custom_data_layer_4/name = "base_production"
 custom_data_layer_4/type = 2
 sources/0 = SubResource("TileSetAtlasSource_uu6xs")
 
-[sub_resource type="GDScript" id="GDScript_hh5pf"]
-script/source = "extends Node
-@onready var game_manager := get_parent().get_node(\"GameManager\")
-"
-
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_7t1a7")
 
@@ -63,5 +61,83 @@ script = ExtResource("6_0w474")
 [node name="UnitActions" type="Node" parent="."]
 script = ExtResource("7_hh5pf")
 
-[node name="AIManager" type="Node" parent="."]
-script = SubResource("GDScript_hh5pf")
+[node name="UICanvas" type="CanvasLayer" parent="."]
+
+[node name="UI" type="Control" parent="UICanvas"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_bor5n")
+
+[node name="UnitInfoContainer" type="MarginContainer" parent="UICanvas/UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Panel" type="Panel" parent="UICanvas/UI/UnitInfoContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UICanvas/UI/UnitInfoContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UICanvas/UI/UnitInfoContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="UnitNameLabel" type="Label" parent="UICanvas/UI/UnitInfoContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "TEST"
+
+[node name="UnitFactionLabel" type="Label" parent="UICanvas/UI/UnitInfoContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Test2"
+
+[node name="UnitTypeLabel" type="Label" parent="UICanvas/UI/UnitInfoContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="UnitAPInfoLabel" type="Label" parent="UICanvas/UI/UnitInfoContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="UnitCombatStatsLabel" type="Label" parent="UICanvas/UI/UnitInfoContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TurnStartBanner" type="Label" parent="UICanvas/UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 60
+text = "TEST"
+
+[node name="SoundManager" type="Node" parent="."]
+script = ExtResource("9_bor5n")
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="SoundManager"]
+stream = ExtResource("10_wltqy")
+pitch_scale = 0.5
+autoplay = true
